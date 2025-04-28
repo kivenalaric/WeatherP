@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useCallback } from 'react';
-import { WeatherData, ForecastDay, ForecastApiResponse } from '../types';
+import { WeatherData, ForecastDay } from '../types';
 
 // interface ForecastDay {
 //   dt: number;
@@ -110,7 +110,7 @@ export const useWeather = () => {
       async (position) => {
         await fetchWeather(position.coords.latitude, position.coords.longitude);
       },
-      async (err) => {
+      async (_err) => {
         setError('Location access denied. Using default location.');
         await fetchWeather(YAOUNDE_COORDS.lat, YAOUNDE_COORDS.lon);
       },
