@@ -1,4 +1,3 @@
-import React from 'react';
 import { Thermometer, Wind } from 'lucide-react';
 
 interface AdditionalInfoProps {

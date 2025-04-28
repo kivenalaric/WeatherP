@@ -1,5 +1,4 @@
 // WeeklyForecast.tsx
-import React from 'react';
 import { ForecastDay } from '../types';
 
 interface WeeklyForecastProps {
