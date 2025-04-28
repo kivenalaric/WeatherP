@@ -23,7 +23,7 @@ export function Header({ city, region }: HeaderProps) {
   // Set initial theme on mount
   React.useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
-  }, []);
+  }, [theme]);
 
   return (
     <header className="flex items-center justify-between mb-8">

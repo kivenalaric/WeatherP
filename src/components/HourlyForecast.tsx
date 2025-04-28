@@ -1,4 +1,3 @@
-import React from 'react';
 import { Sun, Cloud, CloudRain, Moon } from 'lucide-react';
 
 export function HourlyForecast() {
