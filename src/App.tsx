@@ -74,7 +74,7 @@ function App() {
     backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.4)), url(${
       StormyWeather 
         ? 'https://images.unsplash.com/photo-1605727216801-e27ce1d0cc28?auto=format&fit=crop&w=1200'
-        : 'https://images.unsplash.com/photo-1623846736569-1d90cba76d65?auto=format&fit=crop&w=1200'
+        : 'https://img.freepik.com/free-photo/natural-landscape-sunflowers-field-sunny-day_2829-9257.jpg?semt=ais_hybrid&w=740'
     })`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
