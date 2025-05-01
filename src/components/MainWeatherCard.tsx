@@ -133,8 +133,7 @@ export function MainWeatherCard({
         <div className="absolute top-0 right-0 p-4">
             
           <div className="absolute top-0 right-0 p-4">
-            {getWeatherIcon()} {/* Uses Lucide icons */}
-            {/* Fallback to OpenWeatherMap icon (optional) */}
+            {getWeatherIcon()}
             <img
               src={`https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`}
               alt={data.weather[0].description}
