@@ -51,14 +51,9 @@ function App() {
       }
     }
   }, [initialLoad, getLocationWeather, searchCity]);
+  
 
-  // const isStormy = React.useMemo(() => {
-  //   if (!weatherData) return false;
-  //   const stormyConditions = ['Rain', 'Thunderstorm', 'Drizzle', 'Snow'];
-  //   return stormyConditions.some(condition => 
-  //     weatherData.weather[0].main.toLowerCase().includes(condition.toLowerCase())
-  //   );
-  // }, [weatherData]);
+  const StormyWeather = weatherData?.weather?.[0]?.main === 'Thunderstorm' || weatherData?.weather?.[0]?.main === 'Rain';
   const isStormy = React.useMemo(() => {
     if (!weatherData) return false;
     const description = getWindDescription(weatherData.wind.speed);
@@ -67,7 +62,7 @@ function App() {
 
   const weatherBackgroundStyle = {
     backgroundImage: `linear-gradient(to bottom, var(--gradient-start), var(--gradient-end)), url(${
-      isStormy 
+      StormyWeather 
         ? 'https://images.unsplash.com/photo-1594156596782-656c93e4d504?auto=format&fit=crop&w=1920'
         : 'https://images.unsplash.com/photo-1623846736569-1d90cba76d65?auto=format&fit=crop&w=1920'
     })`,
@@ -77,9 +72,9 @@ function App() {
 
   const mainCardStyle = {
     backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.4)), url(${
-      isStormy 
+      StormyWeather 
         ? 'https://images.unsplash.com/photo-1605727216801-e27ce1d0cc28?auto=format&fit=crop&w=1200'
-        : 'https://images.unsplash.com/photo-1623846736569-1d90cba76d65?auto=format&fit=crop&w=1200'
+        : 'https://img.freepik.com/free-photo/natural-landscape-sunflowers-field-sunny-day_2829-9257.jpg?semt=ais_hybrid&w=740'
     })`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
