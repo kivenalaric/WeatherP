@@ -5,11 +5,12 @@ import { Button } from './ui/button';
 interface HeaderProps {
   city: string;
   region: string;
+  unit: 'C' | 'F';
+  onToggleUnit: () => void;
 }
 
-export function Header({ city, region }: HeaderProps) {
+export function Header({ city, region, unit, onToggleUnit }: HeaderProps) {
   const [theme, setTheme] = React.useState<'light' | 'dark'>(() => {
-    // Check localStorage first, then fallback to light
     return localStorage.getItem('theme') as 'light' | 'dark' || 'light';
   });
 
@@ -20,7 +21,6 @@ export function Header({ city, region }: HeaderProps) {
     document.documentElement.classList.toggle('dark', newTheme === 'dark');
   };
 
-  // Set initial theme on mount
   React.useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
   }, [theme]);
@@ -31,17 +31,27 @@ export function Header({ city, region }: HeaderProps) {
         <h2 className="text-2xl font-bold text-white">{city}</h2>
         <p className="text-white/80">{region}</p>
       </div>
-      <Button
-        onClick={toggleTheme}
-        className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-        aria-label={theme === 'light' ? "Switch to dark theme" : "Switch to light theme"}
-      >
-        {theme === 'light' ? (
-          <Moon className="w-6 h-6 text-white" />
-        ) : (
-          <Sun className="w-6 h-6 text-white" />
-        )}
-      </Button>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={onToggleUnit}
+          className="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white text-sm font-semibold tracking-wide"
+          style={{ backgroundColor: 'transparent' }}
+          aria-label={`Switch to °${unit === 'C' ? 'F' : 'C'}`}
+        >
+          °{unit === 'C' ? 'F' : 'C'}
+        </button>
+        <Button
+          onClick={toggleTheme}
+          className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+          aria-label={theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}
+        >
+          {theme === 'light' ? (
+            <Moon className="w-6 h-6 text-white" />
+          ) : (
+            <Sun className="w-6 h-6 text-white" />
+          )}
+        </Button>
+      </div>
     </header>
   );
 }

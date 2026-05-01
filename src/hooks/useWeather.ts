@@ -71,21 +71,29 @@ export const useWeather = () => {
       }));
       setHourlyForecast(hourly);
 
-      // Process forecast data to get one entry per day
-      const dailyForecast = forecastJson.list.reduce((acc: ForecastDay[], item: any) => {
-        const date = new Date(item.dt * 1000);
-        const dateString = date.toDateString();
+      // Group forecast entries by day, compute min/max per day
+      const dayGroups: Record<string, any[]> = {};
+      forecastJson.list.forEach((item: any) => {
+        const key = new Date(item.dt * 1000).toDateString();
+        if (!dayGroups[key]) dayGroups[key] = [];
+        dayGroups[key].push(item);
+      });
 
-        if (!acc.find(d => new Date(d.dt * 1000).toDateString() === dateString)) {
-          acc.push({
-            dt: item.dt,
-            temp: { day: item.main.temp },
-            weather: item.weather
-          });
-        }
-        return acc;
-      }, []).slice(0, 5);
-      // Get next 5 days
+      const dailyForecast: ForecastDay[] = Object.values(dayGroups)
+        .slice(0, 5)
+        .map((items: any[]) => {
+          const temps = items.map((i: any) => i.main.temp);
+          const mid = items[Math.floor(items.length / 2)];
+          return {
+            dt: mid.dt,
+            temp: {
+              day: mid.main.temp,
+              min: Math.min(...temps),
+              max: Math.max(...temps),
+            },
+            weather: mid.weather,
+          };
+        });
 
       setForecastData(dailyForecast);
       

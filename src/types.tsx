@@ -17,6 +17,8 @@ export interface WeatherData {
       };
       sys?: {
         country: string;
+        sunrise: number;
+        sunset: number;
       };
     }
 
@@ -51,10 +53,13 @@ export interface ForecastDay {
   dt: number;
   temp: {
     day: number;
+    min?: number;
+    max?: number;
   };
   weather: {
     id: number;
     main: string;
+    icon: string;
   }[];
 }
 

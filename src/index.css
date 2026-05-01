@@ -220,3 +220,27 @@ body {
 .backdrop-blur-lg {
   backdrop-filter: blur(16px);
 }
+
+/* ── Weather effect animations ── */
+
+@keyframes snow-fall {
+  0%   { transform: translateY(-20px) translateX(0) rotate(0deg);      opacity: 0.8; }
+  50%  { transform: translateY(50vh)  translateX(15px) rotate(180deg); }
+  100% { transform: translateY(105vh) translateX(-5px) rotate(360deg); opacity: 0;   }
+}
+.snow-flake { animation: snow-fall linear infinite; }
+
+@keyframes star-twinkle {
+  0%, 100% { opacity: 0.15; transform: scale(1);   }
+  50%       { opacity: 0.75; transform: scale(1.4); }
+}
+.star { animation: star-twinkle ease-in-out infinite; }
+
+@keyframes sun-pulse {
+  0%, 100% { opacity: 0.18; transform: translateX(-50%) scale(1);    }
+  50%       { opacity: 0.30; transform: translateX(-50%) scale(1.12); }
+}
+.sun-glow {
+  background: radial-gradient(circle, rgba(251, 191, 36, 0.55), transparent 65%);
+  animation: sun-pulse 6s ease-in-out infinite;
+}
