@@ -21,7 +21,8 @@ function App() {
     hourlyForecast,
     error,
     getLocationWeather,
-    searchCity
+    searchCity,
+    getSuggestions,
   } = useWeather();
 
   const getWindDescription = (speedMps: number) => {
@@ -128,7 +129,7 @@ function App() {
       <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-6">
         <Header city={city} region={weatherData.sys?.country || "Cameroon"} />
 
-        <SearchBar onSearch={searchCity} />
+        <SearchBar onSearch={searchCity} getSuggestions={getSuggestions} />
 
         {/* Mobile: single column. Desktop (md+): two column */}
         <div className="md:grid md:grid-cols-2 md:gap-8 md:items-start">

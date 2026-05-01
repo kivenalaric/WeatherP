@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useCallback } from 'react';
-import { WeatherData, ForecastDay, HourlyForecast as HourlyForecastItem } from '../types';
+import { WeatherData, ForecastDay, HourlyForecast as HourlyForecastItem, GeoSuggestion } from '../types';
 
 // interface ForecastDay {
 //   dt: number;
@@ -15,6 +15,16 @@ import { WeatherData, ForecastDay, HourlyForecast as HourlyForecastItem } from '
 // }
 
 const YAOUNDE_COORDS = { lat: 3.8689867, lon: 11.5213344 };
+
+function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 const BASE_URL = import.meta.env.VITE_OPENWEATHER_BASE_URL || 'https://api.openweathermap.org';
 const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
@@ -25,6 +35,7 @@ export const useWeather = () => {
   const [city, setCity] = useState('Yaoundé');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userCoords, setUserCoords] = useState<{ lat: number; lon: number } | null>(null);
 
   const fetchWeather = useCallback(async (lat: number, lon: number) => {
     setLoading(true);
@@ -118,7 +129,9 @@ export const useWeather = () => {
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
-        await fetchWeather(position.coords.latitude, position.coords.longitude);
+        const { latitude, longitude } = position.coords;
+        setUserCoords({ lat: latitude, lon: longitude });
+        await fetchWeather(latitude, longitude);
       },
       async (_err) => {
         setError('Location access denied. Using default location.');
@@ -132,6 +145,36 @@ export const useWeather = () => {
     );
   }, [fetchWeather]);
 
+  const getSuggestions = useCallback(async (query: string): Promise<GeoSuggestion[]> => {
+    if (query.trim().length < 2) return [];
+    try {
+      const res = await fetch(
+        `${BASE_URL}/geo/1.0/direct?q=${encodeURIComponent(query)}&limit=5&appid=${API_KEY}`
+      );
+      if (!res.ok) return [];
+      const data: Array<{ name: string; lat: number; lon: number; country: string; state?: string }> = await res.json();
+
+      const suggestions: GeoSuggestion[] = data.map(item => ({
+        name: item.name,
+        lat: item.lat,
+        lon: item.lon,
+        country: item.country,
+        state: item.state,
+        distanceKm: userCoords
+          ? haversineKm(userCoords.lat, userCoords.lon, item.lat, item.lon)
+          : undefined,
+      }));
+
+      if (userCoords) {
+        suggestions.sort((a, b) => (a.distanceKm ?? Infinity) - (b.distanceKm ?? Infinity));
+      }
+
+      return suggestions;
+    } catch {
+      return [];
+    }
+  }, [userCoords]);
+
   return {
     weatherData,
     forecastData,
@@ -140,6 +183,7 @@ export const useWeather = () => {
     loading,
     error,
     getLocationWeather,
-    searchCity
+    searchCity,
+    getSuggestions,
   };
 };

@@ -58,6 +58,15 @@ export interface ForecastDay {
   }[];
 }
 
+export interface GeoSuggestion {
+  name: string;
+  lat: number;
+  lon: number;
+  country: string;
+  state?: string;
+  distanceKm?: number;
+}
+
 export interface ForecastApiResponse {
     list: Array<{
       dt: number;
