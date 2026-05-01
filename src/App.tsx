@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+import { MapPin } from 'lucide-react';
 import { Header } from './components/Header';
 import { SearchBar } from './components/SearchBar';
 import { MainWeatherCard } from './components/MainWeatherCard';
@@ -12,13 +13,13 @@ import './App.css';
 
 function App() {
   const [activeTab, setActiveTab] = React.useState('today');
-  const [initialLoad, setInitialLoad] = React.useState(true);
-  const { 
-    weatherData, 
-    city, 
+  const {
+    weatherData,
+    city,
     loading,
     forecastData,
-    error, 
+    hourlyForecast,
+    error,
     getLocationWeather,
     searchCity
   } = useWeather();
@@ -39,19 +40,6 @@ function App() {
     if (speedKmh < 103) return 'Storm';
     return 'Hurricane Force';
   };
-
-  useEffect(() => {
-    if (initialLoad) {
-      setInitialLoad(false);
-      const userConfirmed = confirm('Allow location access for weather?');
-      if (userConfirmed) {
-        getLocationWeather();
-      } else {
-        searchCity('Yaoundé');
-      }
-    }
-  }, [initialLoad, getLocationWeather, searchCity]);
-  
 
   const StormyWeather = weatherData?.weather?.[0]?.main === 'Thunderstorm' || weatherData?.weather?.[0]?.main === 'Rain';
   const isStormy = React.useMemo(() => {
@@ -80,29 +68,56 @@ function App() {
     backgroundPosition: 'center',
   };
 
+  if (!weatherData && !loading) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden">
+        {/* Decorative blurred blobs for depth */}
+        <div className="absolute top-1/4 -left-24 w-96 h-96 rounded-full blur-3xl opacity-40" style={{ background: 'rgba(14, 165, 233, 0.45)' }} />
+        <div className="absolute bottom-1/4 -right-24 w-96 h-96 rounded-full blur-3xl opacity-30" style={{ background: 'rgba(6, 182, 212, 0.4)' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-3xl opacity-10" style={{ background: 'rgba(255,255,255,0.3)' }} />
+
+        <div className="relative bg-white/10 backdrop-blur-xl rounded-3xl p-10 mx-4 max-w-sm w-full text-center border border-white/20 shadow-2xl">
+          {/* Icon ring */}
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center border border-sky-300/40" style={{ background: 'rgba(14,165,233,0.2)' }}>
+            <MapPin className="w-10 h-10 text-sky-300" />
+          </div>
+
+          <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">WeatherP</h1>
+          <p className="text-white/55 mb-8 text-sm leading-relaxed">
+            Get accurate weather for your location or search any city worldwide.
+          </p>
+
+          {error && <p className="text-red-400 text-sm mb-4">{error}</p>}
+
+          <button
+            onClick={getLocationWeather}
+            className="w-full text-white font-semibold py-4 px-6 rounded-2xl mb-3 transition-opacity hover:opacity-90 cursor-pointer"
+            style={{ backgroundColor: '#0284c7' }}
+          >
+            Use My Location
+          </button>
+          <button
+            onClick={() => searchCity('Yaoundé')}
+            className="w-full text-white/80 font-medium py-4 px-6 rounded-2xl border border-white/20 hover:bg-white/10 transition-colors cursor-pointer"
+            style={{ backgroundColor: 'transparent' }}
+          >
+            Use Default City
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-white text-xl">Loading weather data...</div>
+      <div className="min-h-screen w-full flex items-center justify-center relative overflow-hidden">
+        <div className="absolute top-1/4 -left-24 w-96 h-96 rounded-full blur-3xl opacity-30" style={{ background: 'rgba(14, 165, 233, 0.45)' }} />
+        <div className="text-white text-xl font-medium tracking-wide">Loading weather data...</div>
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-red-500 text-xl">{error}</div>
-      </div>
-    );
-  }
-
-  if (!weatherData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-white text-xl">Initializing weather app...</div>
-      </div>
-    );
-  }
+  if (!weatherData) return null;
 
   return (
     <div
@@ -110,31 +125,45 @@ function App() {
       className="min-h-screen transition-all duration-300"
       style={weatherBackgroundStyle}
     >
-      <div className="max-w-md mx-auto px-4 py-6">
+      <div className="w-full max-w-5xl mx-auto px-4 md:px-8 py-6">
         <Header city={city} region={weatherData.sys?.country || "Cameroon"} />
 
         <SearchBar onSearch={searchCity} />
 
-        <MainWeatherCard
-          data={weatherData}
-          isStormy={isStormy}
-          temperature={`${Math.round(weatherData.main.temp)}°C`}
-          // windSpeed={`${Math.round(weatherData.wind.speed * 3.6)} km/h`}
-          humidity={`${weatherData.main.humidity}%`}
-          backgroundStyle={mainCardStyle}
-          pressure={`${weatherData.main.pressure} hPa`}
-          windSpeed={`${Math.round(weatherData.wind.speed * 3.6)} km/h`}
-          windDescription={getWindDescription(weatherData.wind.speed)}
-        />
-        
-        <WeatherTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        {/* Mobile: single column. Desktop (md+): two column */}
+        <div className="md:grid md:grid-cols-2 md:gap-8 md:items-start">
+          {/* Left column: main weather card */}
+          <div>
+            <MainWeatherCard
+              data={weatherData}
+              isStormy={isStormy}
+              temperature={`${Math.round(weatherData.main.temp)}°C`}
+              humidity={`${weatherData.main.humidity}%`}
+              backgroundStyle={mainCardStyle}
+              pressure={`${weatherData.main.pressure} hPa`}
+              windSpeed={`${Math.round(weatherData.wind.speed * 3.6)} km/h`}
+              windDescription={getWindDescription(weatherData.wind.speed)}
+            />
+          </div>
 
-        {activeTab === "today" ? <HourlyForecast /> : <WeeklyForecast forecastData={forecastData} />}
+          {/* Right column: forecast + stats */}
+          <div>
+            <WeatherTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-        <AdditionalInfo
-          feelsLike={`${Math.round(weatherData.main.feels_like)}°C`}
-          windSpeed={`${Math.round(weatherData.wind.speed * 3.6)} km/h`}
-        />
+            {activeTab === "today"
+              ? <HourlyForecast hourlyData={[
+                  { hour: 'Now', temp: weatherData.main.temp, icon: weatherData.weather[0].icon, description: weatherData.weather[0].main },
+                  ...hourlyForecast.slice(0, 3),
+                ]} />
+              : <WeeklyForecast forecastData={forecastData} />
+            }
+
+            <AdditionalInfo
+              feelsLike={`${Math.round(weatherData.main.feels_like)}°C`}
+              windSpeed={`${Math.round(weatherData.wind.speed * 3.6)} km/h`}
+            />
+          </div>
+        </div>
       </div>
       <footer className="text-center text-gray-500 text-sm mt-8">
         &copy; {new Date().getFullYear()} Weather App. All rights reserved.

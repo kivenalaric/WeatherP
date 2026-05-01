@@ -37,9 +37,9 @@ export function Header({ city, region }: HeaderProps) {
         aria-label={theme === 'light' ? "Switch to dark theme" : "Switch to light theme"}
       >
         {theme === 'light' ? (
-          <Sun className="w-6 h-6 text-white" />
-        ) : (
           <Moon className="w-6 h-6 text-white" />
+        ) : (
+          <Sun className="w-6 h-6 text-white" />
         )}
       </Button>
     </header>

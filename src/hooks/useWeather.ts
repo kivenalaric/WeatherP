@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useCallback } from 'react';
-import { WeatherData, ForecastDay } from '../types';
+import { WeatherData, ForecastDay, HourlyForecast as HourlyForecastItem } from '../types';
 
 // interface ForecastDay {
 //   dt: number;
@@ -21,6 +21,7 @@ const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
 export const useWeather = () => {
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
   const [forecastData, setForecastData] = useState<ForecastDay[]>([]);
+  const [hourlyForecast, setHourlyForecast] = useState<HourlyForecastItem[]>([]);
   const [city, setCity] = useState('Yaoundé');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,12 +50,21 @@ export const useWeather = () => {
       if (!forecastResponse.ok) throw new Error(`Forecast API error: ${forecastResponse.status}`);
       
       const forecastJson = await forecastResponse.json();
-      
+
+      // Next 4 three-hour slots for hourly forecast
+      const hourly: HourlyForecastItem[] = forecastJson.list.slice(0, 4).map((item: any) => ({
+        hour: new Date(item.dt * 1000).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true }),
+        temp: item.main.temp,
+        icon: item.weather[0].icon,
+        description: item.weather[0].main,
+      }));
+      setHourlyForecast(hourly);
+
       // Process forecast data to get one entry per day
       const dailyForecast = forecastJson.list.reduce((acc: ForecastDay[], item: any) => {
         const date = new Date(item.dt * 1000);
         const dateString = date.toDateString();
-        
+
         if (!acc.find(d => new Date(d.dt * 1000).toDateString() === dateString)) {
           acc.push({
             dt: item.dt,
@@ -63,7 +73,7 @@ export const useWeather = () => {
           });
         }
         return acc;
-      }, []).slice(0, 5); 
+      }, []).slice(0, 5);
       // Get next 5 days
 
       setForecastData(dailyForecast);
@@ -122,12 +132,13 @@ export const useWeather = () => {
     );
   }, [fetchWeather]);
 
-  return { 
-    weatherData, 
+  return {
+    weatherData,
     forecastData,
-    city, 
-    loading, 
-    error, 
+    hourlyForecast,
+    city,
+    loading,
+    error,
     getLocationWeather,
     searchCity
   };
